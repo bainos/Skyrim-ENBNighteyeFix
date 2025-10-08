@@ -8,8 +8,45 @@
 #include <Psapi.h>
 
 #include "ENBSeriesAPI.h"
+#include <iniparser/iniparser.h>
 
-constexpr RE::FormID NIGHT_EYE_SPELL = 0x000AA01D;
+// Configuration
+struct Config {
+    RE::FormID nightEyeSpellFormID = 0x000AA01D;  // Default: vanilla Night Eye
+
+    static Config* GetSingleton() {
+        static Config instance;
+        return &instance;
+    }
+
+    void Load() {
+        const char* iniPath = "Data/SKSE/Plugins/BainosNighteyeFix.ini";
+        dictionary* ini = iniparser_load(iniPath);
+
+        if (ini) {
+            spdlog::info("Loading config from {}", iniPath);
+
+            // Read NightEyeSpellFormID
+            const char* formIDStr = iniparser_getstring(ini, "General:NightEyeSpellFormID", nullptr);
+            if (formIDStr) {
+                // Parse hex string (e.g., "0x000AA01D")
+                unsigned int formID = 0;
+                if (sscanf(formIDStr, "0x%X", &formID) == 1 || sscanf(formIDStr, "%X", &formID) == 1) {
+                    nightEyeSpellFormID = static_cast<RE::FormID>(formID);
+                    spdlog::info("  NightEyeSpellFormID = 0x{:08X}", nightEyeSpellFormID);
+                } else {
+                    spdlog::warn("  Failed to parse NightEyeSpellFormID, using default: 0x{:08X}", nightEyeSpellFormID);
+                }
+            } else {
+                spdlog::info("  NightEyeSpellFormID not found, using default: 0x{:08X}", nightEyeSpellFormID);
+            }
+
+            iniparser_freedict(ini);
+        } else {
+            spdlog::warn("Config file not found: {}, using defaults", iniPath);
+        }
+    }
+};
 
 // Global ENB API pointer
 ENB_API::ENBSDK1001* g_ENB = nullptr;
@@ -108,7 +145,7 @@ public:
             return RE::BSEventNotifyControl::kContinue;
         }
 
-        if (event->baseObject == NIGHT_EYE_SPELL) {
+        if (event->baseObject == Config::GetSingleton()->nightEyeSpellFormID) {
             if (event->equipped) {
                 spdlog::info("Night Eye EQUIPPED");
                 RE::DebugNotification("Night Eye: ON");
@@ -161,6 +198,7 @@ void MessageHandler(SKSE::MessagingInterface::Message* msg) {
 
 void InitializePlugin() {
     SetupLog();
+    Config::GetSingleton()->Load();
 
     // Register serialization callbacks
     auto serialization = SKSE::GetSerializationInterface();

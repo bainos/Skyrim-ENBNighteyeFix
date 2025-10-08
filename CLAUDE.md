@@ -60,10 +60,20 @@ Event OnEffectStart(Actor akTarget, Actor akCaster)
 - vcpkg for dependencies
 - Target: x64 Windows
 
+## Configuration
+- **File**: `Data/SKSE/Plugins/BainosNighteyeFix.ini`
+- **Settings**:
+  - `NightEyeSpellFormID` - FormID of spell to monitor (default: 0x000AA01D)
+- Config loaded on plugin initialization with fallback to defaults
+
 ## Night Eye Spell
-- FormID: `0x000AA01D`
+- Default FormID: `0x000AA01D` (vanilla Night Eye power)
+- Configurable via INI file
 - Triggers on equip/unequip (not cast)
-- Works with vanilla Night Eye power
+
+## Development Resources
+- **CommonLibSSE-NG**: `/mnt/c/dev/CommonLibSSE-NG/include/` - Reference for all RE/SKSE definitions
+- **MANDATORY**: Do not guess API usage. Use provided resources and throw alert if something is missing.
 
 ## Communication with Claude
 **IMPORTANT**: Keep chat responses super concise. No unnecessary explanations or preambles.

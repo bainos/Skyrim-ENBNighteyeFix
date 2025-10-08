@@ -12,6 +12,10 @@ set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 find_package(CommonLibSSE CONFIG REQUIRED)
 find_package(spdlog REQUIRED CONFIG)
 
+# Manual iniparser integration
+find_path(INIPARSER_INCLUDE_DIR iniparser/iniparser.h)
+find_library(INIPARSER_LIBRARY NAMES iniparser iniparser-static)
+
 # --- Define the plugin target first ---
 # This line creates the target named 'BainosNighteyeFix'
 add_commonlibsse_plugin(
@@ -28,14 +32,16 @@ target_compile_options(${PROJECT_NAME} PRIVATE /FI${PATCH_HEADER_PATH_NATIVE})
 
 # 1. Link libraries
 # Use ${PROJECT_NAME} (which is BainosNighteyeFix) instead of the undefined 'main'
-target_link_libraries(${PROJECT_NAME} PRIVATE 
+target_link_libraries(${PROJECT_NAME} PRIVATE
     CommonLibSSE::CommonLibSSE
     spdlog::spdlog
+    ${INIPARSER_LIBRARY}
 )
 
-# Add ENB API include directory
-target_include_directories(${PROJECT_NAME} PRIVATE 
+# Add ENB API and iniparser include directories
+target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/extern/enb-api
+    ${INIPARSER_INCLUDE_DIR}
 )
 
 # 2. Include directories

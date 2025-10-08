@@ -1,0 +1,3 @@
+[submodule "extern/enb-api"]
+	path = extern/enb-api
+	url = https://github.com/doodlum/enb-api.git

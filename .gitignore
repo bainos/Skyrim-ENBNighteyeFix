@@ -20,6 +20,9 @@ vcpkg_installed/
 # Compiled Papyrus
 *.pex
 
+# Compiled DLL
+*.dll
+
 # Logs
 *.log
 

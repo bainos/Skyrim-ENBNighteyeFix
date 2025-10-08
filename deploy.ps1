@@ -5,14 +5,6 @@ $localDestPath = "C:\dev\BainosNighteyeFix\BainosNighteyeMod"
 
 # Define source and destination pairs
 $fileCopies = @(
-#    @{
-#        Source = "Scripts\BainosNighteyeFix.psc"
-#        Dest = "$modDestPath\Source\Scripts\BainosNighteyeFix.psc"
-#    },
-#    @{
-#        Source = "Scripts\BainosNighteyeFix.pex"
-#        Dest = "$modDestPath\Scripts\BainosNighteyeFix.pex"
-#    },
     @{
         Source = "out\BainosNighteyeFix.dll"
         Dest = "$modDestPath\SKSE\plugins\BainosNighteyeFix.dll"
@@ -21,14 +13,10 @@ $fileCopies = @(
         Source = "BainosNighteyeMod\Root\enbseries\enbeffect.fx"
         Dest = "$modDestPath\Root\enbseries\enbeffect.fx"
     },
-#    @{
-#        Source = "Scripts\BainosNighteyeFix.psc"
-#        Dest = "$localDestPath\Source\Scripts\BainosNighteyeFix.psc"
-#    },
-#    @{
-#        Source = "Scripts\BainosNighteyeFix.pex"
-#        Dest = "$localDestPath\Scripts\BainosNighteyeFix.pex"
-#    },
+    @{
+        Source = "BainosNighteyeMod\SKSE\plugins\BainosNighteyeFix.ini"
+        Dest = "$modDestPath\SKSE\plugins\BainosNighteyeFix.ini"
+    },
     @{
         Source = "out\BainosNighteyeFix.dll"
         Dest = "$localDestPath\SKSE\plugins\BainosNighteyeFix.dll"

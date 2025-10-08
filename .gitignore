@@ -1,0 +1,42 @@
+# Build directories
+out/
+build/
+.vs/
+.vscode/
+.idea/
+
+# Claude Code
+.claude/
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+install_manifest.txt
+
+# vcpkg
+vcpkg_installed/
+
+# Compiled Papyrus
+*.pex
+
+# Logs
+*.log
+
+# Backup files
+*.20*
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Visual Studio
+*.user
+*.suo
+*.sln.docstates
+.vs/
+
+# Temporary files
+*.tmp
+*.temp
+*~

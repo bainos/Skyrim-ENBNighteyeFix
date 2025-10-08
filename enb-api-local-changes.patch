@@ -1,0 +1,1383 @@
+diff --git a/AntTweakBar.h b/AntTweakBar.h
+index 84c6018..36574c7 100644
+--- a/AntTweakBar.h
++++ b/AntTweakBar.h
+@@ -1,174 +1,174 @@
+-// ----------------------------------------------------------------------------
+-//
+-//	@file		AntTweakBar.h
+-//
+-//	@brief		AntTweakBar is a light and intuitive graphical user interface
+-//				that can be readily integrated into OpenGL and DirectX
+-//				applications in order to interactively tweak parameters.
+-//
+-//	@author		Philippe Decaudin
+-//
+-//	@doc		http://anttweakbar.sourceforge.net/doc
+-//
+-//	@license	This file is part of the AntTweakBar library.
+-//				AntTweakBar is a free software released under the zlib license.
+-//				For conditions of distribution and use, see License.txt
+-//
+-// ----------------------------------------------------------------------------
+-
+-
+-#if !defined TW_INCLUDED
+-#define TW_INCLUDED
+-
+-#include <stddef.h>
+-
+-#define TW_VERSION	117 // Version Mmm : M=Major mm=minor (e.g., 102 is version 1.02)
+-
+-
+-#ifdef	__cplusplus
+-#	if defined(_MSC_VER)
+-#		pragma warning(push)
+-#		pragma warning(disable: 4995 4530)
+-#		include <string>
+-#		pragma warning(pop)
+-#	else
+-#		include <string>
+-#	endif
+-	extern "C" {
+-#endif	// __cplusplus
+-
+-
+-// ----------------------------------------------------------------------------
+-//	OS specific definitions
+-// ----------------------------------------------------------------------------
+-
+-#if (defined(_WIN32) || defined(_WIN64)) && !defined(TW_STATIC)
+-#	define TW_CALL			__stdcall
+-#	define TW_CDECL_CALL	__cdecl
+-#	define TW_EXPORT_API	__declspec(dllexport)
+-#	define TW_IMPORT_API	__declspec(dllimport)
+-#else
+-#	define TW_CALL
+-#	define TW_CDECL_CALL
+-#	define TW_EXPORT_API
+-#	define TW_IMPORT_API
+-#endif
+-
+-
+-#define TW_API
+-
+-// ----------------------------------------------------------------------------
+-//	Bar functions and definitions
+-// ----------------------------------------------------------------------------
+-
+-typedef struct CTwBar TwBar; // structure CTwBar is not exposed.
+-
+-//TW_API TwBar *		TW_CALL TwNewBar(const char *barName);
+-//TW_API int			TW_CALL TwDeleteBar(TwBar *bar);
+-//TW_API int			TW_CALL TwDeleteAllBars();
+-//TW_API int			TW_CALL TwSetTopBar(const TwBar *bar);
+-//TW_API TwBar *		TW_CALL TwGetTopBar();
+-//TW_API int			TW_CALL TwSetBottomBar(const TwBar *bar);
+-//TW_API TwBar *		TW_CALL TwGetBottomBar();
+-//TW_API const char * TW_CALL TwGetBarName(const TwBar *bar);
+-//TW_API int			TW_CALL TwGetBarCount();
+-//TW_API TwBar *		TW_CALL TwGetBarByIndex(int barIndex);
+-//TW_API TwBar *		TW_CALL TwGetBarByName(const char *barName);
+-//TW_API int			TW_CALL TwRefreshBar(TwBar *bar);
+-//TW_API TwBar *		TW_CALL TwGetActiveBar();
+-
+-// ----------------------------------------------------------------------------
+-//	Var functions and definitions
+-// ----------------------------------------------------------------------------
+-
+-typedef enum ETwType
+-{
+-	TW_TYPE_UNDEF	= 0,
+-#ifdef __cplusplus
+-	TW_TYPE_BOOLCPP = 1,
+-#endif // __cplusplus
+-	TW_TYPE_BOOL8	= 2,
+-	TW_TYPE_BOOL16,
+-	TW_TYPE_BOOL32,
+-	TW_TYPE_CHAR,
+-	TW_TYPE_INT8,
+-	TW_TYPE_UINT8,
+-	TW_TYPE_INT16,
+-	TW_TYPE_UINT16,
+-	TW_TYPE_INT32,
+-	TW_TYPE_UINT32,
+-	TW_TYPE_FLOAT,
+-	TW_TYPE_DOUBLE,
+-	TW_TYPE_COLOR32,	// 32 bits color. Order is RGBA if API is OpenGL or Direct3D10, and inversed if API is Direct3D9 (can be modified by defining 'colorOrder=...', see doc)
+-	TW_TYPE_COLOR3F,	// 3 floats color. Order is RGB.
+-	TW_TYPE_COLOR4F,	// 4 floats color. Order is RGBA.
+-	TW_TYPE_CDSTRING,	// Null-terminated C Dynamic String (pointer to an array of char dynamically allocated with malloc/realloc/strdup)
+-#ifdef __cplusplus
+-# if defined(_MSC_VER) && (_MSC_VER == 1600)
+-	TW_TYPE_STDSTRING = (0x2ffe0000+sizeof(std::string)),  // VS2010 C++ STL string (std::string)
+-# else
+-	TW_TYPE_STDSTRING = (0x2fff0000+sizeof(std::string)),  // C++ STL string (std::string)
+-# endif
+-#endif // __cplusplus
+-	TW_TYPE_QUAT4F = TW_TYPE_CDSTRING+2, // 4 floats encoding a quaternion {qx,qy,qz,qs}
+-	TW_TYPE_QUAT4D,		// 4 doubles encoding a quaternion {qx,qy,qz,qs}
+-	TW_TYPE_DIR3F,		// direction vector represented by 3 floats
+-	TW_TYPE_DIR3D		// direction vector represented by 3 doubles
+-} TwType;
+-#define TW_TYPE_CSSTRING(n) ((TwType)(0x30000000+((n)&0xfffffff))) // Null-terminated C Static String of size n (defined as char[n], with n<2^28)
+-
+-typedef void (TW_CALL * TwSetVarCallback)(const void *value, void *clientData);
+-typedef void (TW_CALL * TwGetVarCallback)(void *value, void *clientData);
+-typedef void (TW_CALL * TwButtonCallback)(void *clientData);
+-
+-//TW_API int		TW_CALL TwAddVarRW(TwBar *bar, const char *name, TwType type, void *var, const char *def);
+-//TW_API int		TW_CALL TwAddVarRO(TwBar *bar, const char *name, TwType type, const void *var, const char *def);
+-//TW_API int		TW_CALL TwAddVarCB(TwBar *bar, const char *name, TwType type, TwSetVarCallback setCallback, TwGetVarCallback getCallback, void *clientData, const char *def);
+-//TW_API int		TW_CALL TwAddButton(TwBar *bar, const char *name, TwButtonCallback callback, void *clientData, const char *def);
+-//TW_API int		TW_CALL TwAddSeparator(TwBar *bar, const char *name, const char *def);
+-//TW_API int		TW_CALL TwRemoveVar(TwBar *bar, const char *name);
+-//TW_API int		TW_CALL TwRemoveAllVars(TwBar *bar);
+-
+-typedef struct CTwEnumVal
+-{
+-	int			  Value;
+-	const char *  Label;
+-} TwEnumVal;
+-typedef struct CTwStructMember
+-{
+-	const char *  Name;
+-	TwType		  Type;
+-	size_t		  Offset;
+-	const char *  DefString;
+-} TwStructMember;
+-typedef void (TW_CALL * TwSummaryCallback)(char *summaryString, size_t summaryMaxLength, const void *value, void *clientData);
+-
+-//TW_API int		TW_CALL TwDefine(const char *def);
+-//TW_API TwType	TW_CALL TwDefineEnum(const char *name, const TwEnumVal *enumValues, unsigned int nbValues);
+-//TW_API TwType	TW_CALL TwDefineEnumFromString(const char *name, const char *enumString);
+-//TW_API TwType	TW_CALL TwDefineStruct(const char *name, const TwStructMember *structMembers, unsigned int nbMembers, size_t structSize, TwSummaryCallback summaryCallback, void *summaryClientData);
+-
+-typedef void (TW_CALL * TwCopyCDStringToClient)(char **destinationClientStringPtr, const char *sourceString);
+-//TW_API void		TW_CALL TwCopyCDStringToClientFunc(TwCopyCDStringToClient copyCDStringFunc);
+-//TW_API void		TW_CALL TwCopyCDStringToLibrary(char **destinationLibraryStringPtr, const char *sourceClientString);
+-#ifdef __cplusplus
+-typedef void (TW_CALL * TwCopyStdStringToClient)(std::string& destinationClientString, const std::string& sourceString);
+-//TW_API void		TW_CALL TwCopyStdStringToClientFunc(TwCopyStdStringToClient copyStdStringToClientFunc);
+-//TW_API void		TW_CALL TwCopyStdStringToLibrary(std::string& destinationLibraryString, const std::string& sourceClientString);
+-#endif // __cplusplus
+-
+-typedef enum ETwParamValueType
+-{
+-	TW_PARAM_INT32,
+-	TW_PARAM_FLOAT,
+-	TW_PARAM_DOUBLE,
+-	TW_PARAM_CSTRING // Null-terminated array of char (ie, c-string)
+-} TwParamValueType;
+-//TW_API int		TW_CALL TwGetParam(TwBar *bar, const char *varName, const char *paramName, TwParamValueType paramValueType, unsigned int outValueMaxCount, void *outValues);
+-//TW_API int		TW_CALL TwSetParam(TwBar *bar, const char *varName, const char *paramName, TwParamValueType paramValueType, unsigned int inValueCount, const void *inValues);
+-
+-#ifdef	__cplusplus
+-	}	// extern "C"
+-#endif	// __cplusplus
+-
+-#endif	// !defined TW_INCLUDED
++// ----------------------------------------------------------------------------
++//
++//	@file		AntTweakBar.h
++//
++//	@brief		AntTweakBar is a light and intuitive graphical user interface
++//				that can be readily integrated into OpenGL and DirectX
++//				applications in order to interactively tweak parameters.
++//
++//	@author		Philippe Decaudin
++//
++//	@doc		http://anttweakbar.sourceforge.net/doc
++//
++//	@license	This file is part of the AntTweakBar library.
++//				AntTweakBar is a free software released under the zlib license.
++//				For conditions of distribution and use, see License.txt
++//
++// ----------------------------------------------------------------------------
++
++
++#if !defined TW_INCLUDED
++#define TW_INCLUDED
++
++#include <stddef.h>
++
++#define TW_VERSION	117 // Version Mmm : M=Major mm=minor (e.g., 102 is version 1.02)
++
++
++#ifdef	__cplusplus
++#	if defined(_MSC_VER)
++#		pragma warning(push)
++#		pragma warning(disable: 4995 4530)
++#		include <string>
++#		pragma warning(pop)
++#	else
++#		include <string>
++#	endif
++	extern "C" {
++#endif	// __cplusplus
++
++
++// ----------------------------------------------------------------------------
++//	OS specific definitions
++// ----------------------------------------------------------------------------
++
++#if (defined(_WIN32) || defined(_WIN64)) && !defined(TW_STATIC)
++#	define TW_CALL			__stdcall
++#	define TW_CDECL_CALL	__cdecl
++#	define TW_EXPORT_API	__declspec(dllexport)
++#	define TW_IMPORT_API	__declspec(dllimport)
++#else
++#	define TW_CALL
++#	define TW_CDECL_CALL
++#	define TW_EXPORT_API
++#	define TW_IMPORT_API
++#endif
++
++
++#define TW_API
++
++// ----------------------------------------------------------------------------
++//	Bar functions and definitions
++// ----------------------------------------------------------------------------
++
++typedef struct CTwBar TwBar; // structure CTwBar is not exposed.
++
++//TW_API TwBar *		TW_CALL TwNewBar(const char *barName);
++//TW_API int			TW_CALL TwDeleteBar(TwBar *bar);
++//TW_API int			TW_CALL TwDeleteAllBars();
++//TW_API int			TW_CALL TwSetTopBar(const TwBar *bar);
++//TW_API TwBar *		TW_CALL TwGetTopBar();
++//TW_API int			TW_CALL TwSetBottomBar(const TwBar *bar);
++//TW_API TwBar *		TW_CALL TwGetBottomBar();
++//TW_API const char * TW_CALL TwGetBarName(const TwBar *bar);
++//TW_API int			TW_CALL TwGetBarCount();
++//TW_API TwBar *		TW_CALL TwGetBarByIndex(int barIndex);
++//TW_API TwBar *		TW_CALL TwGetBarByName(const char *barName);
++//TW_API int			TW_CALL TwRefreshBar(TwBar *bar);
++//TW_API TwBar *		TW_CALL TwGetActiveBar();
++
++// ----------------------------------------------------------------------------
++//	Var functions and definitions
++// ----------------------------------------------------------------------------
++
++typedef enum ETwType
++{
++	TW_TYPE_UNDEF	= 0,
++#ifdef __cplusplus
++	TW_TYPE_BOOLCPP = 1,
++#endif // __cplusplus
++	TW_TYPE_BOOL8	= 2,
++	TW_TYPE_BOOL16,
++	TW_TYPE_BOOL32,
++	TW_TYPE_CHAR,
++	TW_TYPE_INT8,
++	TW_TYPE_UINT8,
++	TW_TYPE_INT16,
++	TW_TYPE_UINT16,
++	TW_TYPE_INT32,
++	TW_TYPE_UINT32,
++	TW_TYPE_FLOAT,
++	TW_TYPE_DOUBLE,
++	TW_TYPE_COLOR32,	// 32 bits color. Order is RGBA if API is OpenGL or Direct3D10, and inversed if API is Direct3D9 (can be modified by defining 'colorOrder=...', see doc)
++	TW_TYPE_COLOR3F,	// 3 floats color. Order is RGB.
++	TW_TYPE_COLOR4F,	// 4 floats color. Order is RGBA.
++	TW_TYPE_CDSTRING,	// Null-terminated C Dynamic String (pointer to an array of char dynamically allocated with malloc/realloc/strdup)
++#ifdef __cplusplus
++# if defined(_MSC_VER) && (_MSC_VER == 1600)
++	TW_TYPE_STDSTRING = (0x2ffe0000+sizeof(std::string)),  // VS2010 C++ STL string (std::string)
++# else
++	TW_TYPE_STDSTRING = (0x2fff0000+sizeof(std::string)),  // C++ STL string (std::string)
++# endif
++#endif // __cplusplus
++	TW_TYPE_QUAT4F = TW_TYPE_CDSTRING+2, // 4 floats encoding a quaternion {qx,qy,qz,qs}
++	TW_TYPE_QUAT4D,		// 4 doubles encoding a quaternion {qx,qy,qz,qs}
++	TW_TYPE_DIR3F,		// direction vector represented by 3 floats
++	TW_TYPE_DIR3D		// direction vector represented by 3 doubles
++} TwType;
++#define TW_TYPE_CSSTRING(n) ((TwType)(0x30000000+((n)&0xfffffff))) // Null-terminated C Static String of size n (defined as char[n], with n<2^28)
++
++typedef void (TW_CALL * TwSetVarCallback)(const void *value, void *clientData);
++typedef void (TW_CALL * TwGetVarCallback)(void *value, void *clientData);
++typedef void (TW_CALL * TwButtonCallback)(void *clientData);
++
++//TW_API int		TW_CALL TwAddVarRW(TwBar *bar, const char *name, TwType type, void *var, const char *def);
++//TW_API int		TW_CALL TwAddVarRO(TwBar *bar, const char *name, TwType type, const void *var, const char *def);
++//TW_API int		TW_CALL TwAddVarCB(TwBar *bar, const char *name, TwType type, TwSetVarCallback setCallback, TwGetVarCallback getCallback, void *clientData, const char *def);
++//TW_API int		TW_CALL TwAddButton(TwBar *bar, const char *name, TwButtonCallback callback, void *clientData, const char *def);
++//TW_API int		TW_CALL TwAddSeparator(TwBar *bar, const char *name, const char *def);
++//TW_API int		TW_CALL TwRemoveVar(TwBar *bar, const char *name);
++//TW_API int		TW_CALL TwRemoveAllVars(TwBar *bar);
++
++typedef struct CTwEnumVal
++{
++	int			  Value;
++	const char *  Label;
++} TwEnumVal;
++typedef struct CTwStructMember
++{
++	const char *  Name;
++	TwType		  Type;
++	size_t		  Offset;
++	const char *  DefString;
++} TwStructMember;
++typedef void (TW_CALL * TwSummaryCallback)(char *summaryString, size_t summaryMaxLength, const void *value, void *clientData);
++
++//TW_API int		TW_CALL TwDefine(const char *def);
++//TW_API TwType	TW_CALL TwDefineEnum(const char *name, const TwEnumVal *enumValues, unsigned int nbValues);
++//TW_API TwType	TW_CALL TwDefineEnumFromString(const char *name, const char *enumString);
++//TW_API TwType	TW_CALL TwDefineStruct(const char *name, const TwStructMember *structMembers, unsigned int nbMembers, size_t structSize, TwSummaryCallback summaryCallback, void *summaryClientData);
++
++typedef void (TW_CALL * TwCopyCDStringToClient)(char **destinationClientStringPtr, const char *sourceString);
++//TW_API void		TW_CALL TwCopyCDStringToClientFunc(TwCopyCDStringToClient copyCDStringFunc);
++//TW_API void		TW_CALL TwCopyCDStringToLibrary(char **destinationLibraryStringPtr, const char *sourceClientString);
++#ifdef __cplusplus
++typedef void (TW_CALL * TwCopyStdStringToClient)(std::string& destinationClientString, const std::string& sourceString);
++//TW_API void		TW_CALL TwCopyStdStringToClientFunc(TwCopyStdStringToClient copyStdStringToClientFunc);
++//TW_API void		TW_CALL TwCopyStdStringToLibrary(std::string& destinationLibraryString, const std::string& sourceClientString);
++#endif // __cplusplus
++
++typedef enum ETwParamValueType
++{
++	TW_PARAM_INT32,
++	TW_PARAM_FLOAT,
++	TW_PARAM_DOUBLE,
++	TW_PARAM_CSTRING // Null-terminated array of char (ie, c-string)
++} TwParamValueType;
++//TW_API int		TW_CALL TwGetParam(TwBar *bar, const char *varName, const char *paramName, TwParamValueType paramValueType, unsigned int outValueMaxCount, void *outValues);
++//TW_API int		TW_CALL TwSetParam(TwBar *bar, const char *varName, const char *paramName, TwParamValueType paramValueType, unsigned int inValueCount, const void *inValues);
++
++#ifdef	__cplusplus
++	}	// extern "C"
++#endif	// __cplusplus
++
++#endif	// !defined TW_INCLUDED
+diff --git a/ENBSeriesAPI.h b/ENBSeriesAPI.h
+index d6055ab..f2aee2e 100644
+--- a/ENBSeriesAPI.h
++++ b/ENBSeriesAPI.h
+@@ -1,280 +1,280 @@
+-#pragma once
+-
+-#include "ENBSeriesSDK.h"
+-
+-using namespace ENB_SDK;
+-
+-namespace ENB_API
+-{
+-	#include <AntTweakBar.h>
+-
+-	// Available ENBSeries SDK versions
+-	enum class SDKVersion : long
+-	{
+-		V1000 = 1000,
+-		V1001 = 1001
+-	};
+-
+-	// ENB Series' modder interface
+-	class ENBAPI
+-	{
+-
+-	public:
+-
+-		/// <summary>
+-		/// Returns the version of the SDK used by the ENBSeries.<br/>
+-		/// Guaranteed compatibility for all Xxxx versions only, for example 1025 will work with sdk version 1000-1025, 2025 will work with sdk version 2000-2025, etc.
+-		/// </summary>
+-		/// <returns>
+-		/// Version of SDK used by the ENBSeries, 1000 means 1.0, 1001 means 1.01, etc.
+-		/// </returns>
+-		long GetSDKVersion()
+-		{
+-			return reinterpret_cast<_ENBGetSDKVersion>(GetProcAddress(enbmodule, "ENBGetSDKVersion"))();
+-		}
+-
+-		ENBAPI(HMODULE a_enbmodule)
+-		{
+-			this->enbmodule = a_enbmodule;
+-		}
+-
+-
+-	protected:
+-
+-		HMODULE enbmodule = NULL;
+-
+-
+-	};
+-
+-
+-	class ENBSDK1000 : public ENBAPI
+-	{
+-
+-	public:
+-
+-		/// <summary>
+-		/// Returns the version of ENBSeries.
+-		/// </summary>
+-		/// <returns>
+-		/// Version of ENBSeries, 279 means 0.279 etc.
+-		/// </returns>
+-		long GetVersion()
+-		{
+-			return reinterpret_cast<_ENBGetVersion>(GetProcAddress(enbmodule, "ENBGetVersion"))();
+-		}
+-
+-		/// <summary>
+-		/// Returns the unique ENBSeries game identifier.
+-		/// </summary>
+-		/// <returns>
+-		/// Unique game identifier, for example ENBGAMEID_SKYRIM.
+-		/// </returns>
+-		long GetGameIdentifier()
+-		{
+-			return reinterpret_cast<_ENBGetGameIdentifier>(GetProcAddress(enbmodule, "ENBGetGameIdentifier"))();
+-		}
+-
+-		/// <summary>
+-		/// Adds a callback function which is executed by ENBSeries at certain moments. This helps to bypass potential bugs and may increase performance. 
+-		/// </summary> 
+-		void SetCallbackFunction(ENBCallbackFunction a_func)
+-		{
+-			reinterpret_cast<_ENBSetCallbackFunction>(GetProcAddress(enbmodule, "ENBSetCallbackFunction"))(a_func);
+-		}
+-
+-		/// <summary> 
+-		/// Get the value of a parameter.<br/>
+-		/// Parameters may spawn or be deleted when the user is modifying shaders, so it's highly recommended to call this inside a callback function.</summary>
+-		/// <param name="a_filename"> Use NULL to access shader variables instead of configuration files.</param>
+-		/// <param name="a_outparam"> Structure which contains output parameters.</param>
+-		/// <returns> False if failed because function arguments are invalid, parameter does not exist or is hidden.</returns>
+-		bool GetParameter(char* a_filename, char* a_category, char* a_keyname, ENBParameter* a_outparam)
+-		{
+-			return reinterpret_cast<_ENBGetParameter>(GetProcAddress(enbmodule, "ENBGetParameter"))(a_filename, a_category, a_keyname, a_outparam);
+-		}
+-		bool GetParameter(const char* a_filename, const char* a_category, const char* a_keyname, ENBParameter* a_outparam)
+-		{
+-			return reinterpret_cast<_ENBGetParameterA>(GetProcAddress(enbmodule, "ENBGetParameter"))(a_filename, a_category, a_keyname, a_outparam);
+-		}
+-
+-		/// <summary>
+-		/// Set the value of a parameter.<br/>
+-		/// Any values forced by this parameter can be saved by user in editor window, which means corruption of presets,
+-		/// so it's highly recommended to warn users about that.
+-		/// </summary>
+-		/// <param name="a_filename"> Use NULL to access shader variables instead of configuration files.</param>
+-		/// <returns> 
+-		/// FALSE if failed, because function arguments are invalid, parameter not exist, hidden or read only.<br/>
+-		/// FALSE if called outside of callback function to protect against graphical artifacts and crashes.
+-		/// </returns>
+-		bool SetParameter(char* a_filename, char* a_category, char* a_keyname, ENBParameter* a_inparam)
+-		{
+-			return reinterpret_cast<_ENBSetParameter>(GetProcAddress(enbmodule, "ENBSetParameter"))(a_filename, a_category, a_keyname, a_inparam);
+-		}
+-		bool SetParameter(char* a_filename, const char* a_category, const char* a_keyname, ENBParameter* a_inparam)
+-		{
+-			return reinterpret_cast<_ENBSetParameterA>(GetProcAddress(enbmodule, "ENBSetParameter"))(a_filename, a_category, a_keyname, a_inparam);
+-		}
+-
+-
+-	};
+-
+-	class ENBSDK1001 : public ENBSDK1000
+-	{
+-	public:
+-
+-
+-		/// <summary>
+-		/// Receive various objects for advanced programming.
+-		/// </summary>
+-		/// <returns>
+-		/// NULL if called too early and not everything is initialized yet.
+-		/// </returns>
+-		ENBRenderInfo* GetRenderInfo()
+-		{
+-			return reinterpret_cast<_ENBGetRenderInfo>(GetProcAddress(enbmodule, "ENBGetRenderInfo"))();
+-		}
+-
+-		/// <summary>
+-		/// Receive various states of the mod.
+-		/// </summary>
+-		/// <returns>
+-		/// Returns boolean or indexed values, depending from which state it was requested.
+-		/// </returns>
+-		long GetState(ENBStateType state)
+-		{
+-			return reinterpret_cast<_ENBStateType>(GetProcAddress(enbmodule, "ENBGetState"))(state);
+-		}
+-
+-
+-	};
+-
+-	class ENBSDKALT1001 : public ENBSDK1001
+-	{
+-	public:
+-
+-		typedef TwBar*      (*_TwNewBar)(const char* barName);
+-		typedef int			(*_TwDeleteBar)(TwBar* bar);
+-		typedef const char* (*_TwGetBarName)(const TwBar* bar);
+-		typedef TwBar*		(*_TwGetBarByName)(const char* barName);
+-		typedef int			(*_TwRefreshBar)(TwBar* bar);
+-
+-		TwBar* TwNewBar(const char* barName)
+-		{
+-			return reinterpret_cast<_TwNewBar>(GetProcAddress(enbmodule, "TwNewBar"))(barName);
+-		}
+-
+-		int TwDeleteBar(TwBar* bar)
+-		{
+-			return reinterpret_cast<_TwDeleteBar>(GetProcAddress(enbmodule, "TwDeleteBar"))(bar);
+-		}
+-
+-		TwBar* TwGetBarByName(const char* barName)
+-		{
+-			return reinterpret_cast<_TwGetBarByName>(GetProcAddress(enbmodule, "TwGetBarByName"))(barName);
+-		}
+-
+-		int TwRefreshBar(TwBar* bar)
+-		{
+-			return reinterpret_cast<_TwRefreshBar>(GetProcAddress(enbmodule, "TwRefreshBar"))(bar);
+-		}
+-
+-
+-		typedef int (*_TwAddVarRW)(TwBar* bar, const char* name, TwType type, void* var, const char* def);
+-		typedef int (*_TwAddVarRO)(TwBar* bar, const char* name, TwType type, const void* var, const char* def);
+-		typedef int (*_TwAddVarCB)(TwBar* bar, const char* name, TwType type, TwSetVarCallback setCallback, TwGetVarCallback getCallback, void* clientData, const char* def);
+-		typedef int (*_TwAddButton)(TwBar* bar, const char* name, TwButtonCallback callback, void* clientData, const char* def);
+-		typedef int (*_TwAddSeparator)(TwBar* bar, const char* name, const char* def);
+-		typedef int (*_TwRemoveVar)(TwBar* bar, const char* name);
+-		typedef int (*_TwRemoveAllVars)(TwBar* bar);
+-
+-		int TwAddVarRW(TwBar* bar, const char* name, TwType type, void* var, const char* def)
+-		{
+-			return reinterpret_cast<_TwAddVarRW>(GetProcAddress(enbmodule, "TwAddVarRW"))(bar, name, type, var, def);
+-		}
+-
+-		int TwAddVarRO(TwBar* bar, const char* name, TwType type, const void* var, const char* def)
+-		{
+-			return reinterpret_cast<_TwAddVarRO>(GetProcAddress(enbmodule, "TwAddVarRO"))(bar, name, type, var, def);
+-		}
+-
+-		int TwAddVarCB(TwBar* bar, const char* name, TwType type, TwSetVarCallback setCallback, TwGetVarCallback getCallback, void* clientData, const char* def)
+-		{
+-			return reinterpret_cast<_TwAddVarCB>(GetProcAddress(enbmodule, "TwAddVarCB"))(bar, name, type, setCallback, getCallback, clientData, def);
+-		}
+-
+-		int TwAddButton(TwBar* bar, const char* name, TwButtonCallback callback, void* clientData, const char* def)
+-		{
+-			return reinterpret_cast<_TwAddButton>(GetProcAddress(enbmodule, "TwAddButton"))(bar, name, callback, clientData, def);
+-		}
+-
+-		int TwAddSeparator(TwBar* bar, const char* name, const char* def)
+-		{
+-			return reinterpret_cast<_TwAddSeparator>(GetProcAddress(enbmodule, "TwAddVarRO"))(bar, name, def);
+-		}
+-
+-		int TwRemoveVar(TwBar* bar, const char* name)
+-		{
+-			return reinterpret_cast<_TwRemoveVar>(GetProcAddress(enbmodule, "TwRemoveVar"))(bar, name);
+-		}
+-
+-		int TwRemoveAllVars(TwBar* bar)
+-		{
+-			return reinterpret_cast<_TwRemoveAllVars>(GetProcAddress(enbmodule, "TwRemoveAllVars"))(bar);
+-		}
+-
+-
+-		typedef int (*_TwGetParam)(TwBar* bar, const char* varName, const char* paramName, TwParamValueType paramValueType, unsigned int outValueMaxCount, void* outValues);
+-		typedef int (*_TwSetParam)(TwBar* bar, const char* varName, const char* paramName, TwParamValueType paramValueType, unsigned int inValueCount, const void* inValues);
+-
+-		int TwGetParam(TwBar* bar, const char* varName, const char* paramName, TwParamValueType paramValueType, unsigned int outValueMaxCount, void* outValues)
+-		{
+-			return reinterpret_cast<_TwGetParam>(GetProcAddress(enbmodule, "TwGetParam"))(bar, varName, paramName, paramValueType, outValueMaxCount, outValues);
+-		}
+-
+-		int TwSetParam(TwBar* bar, const char* varName, const char* paramName, TwParamValueType paramValueType, unsigned int inValueCount, const void* inValues)
+-		{
+-			return reinterpret_cast<_TwSetParam>(GetProcAddress(enbmodule, "TwSetParam"))(bar, varName, paramName, paramValueType, inValueCount, inValues);
+-		}
+-
+-	};
+-
+-	/// <summary>
+-	/// Request the ENB SDK interface.
+-	/// Recommended: Send your request during or after SKSEMessagingInterface::kMessage_PostLoad to make sure the dll has already been loaded
+-	/// </summary>
+-	/// <param name="a_ENBSDKVersion">The SDK version to request</param>
+-	/// <returns>The pointer to the API singleton, or nullptr if request failed</returns>
+-	[[nodiscard]] static inline void* RequestENBAPI(const SDKVersion a_ENBSDKVersion = SDKVersion::V1001)
+-	{
+-		DWORD   cb = 1000 * sizeof(HMODULE);
+-		DWORD   cbNeeded = 0;
+-		HMODULE enbmodule = NULL;
+-		HMODULE hmodules[1000];
+-		HANDLE  hproc = GetCurrentProcess();
+-		for (long i = 0; i < 1000; i++) hmodules[i] = NULL;
+-		// Find the proper library using the existance of an exported function, because several with the same name may exist
+-		if (EnumProcessModules(hproc, hmodules, cb, &cbNeeded)) {
+-			long count = cbNeeded / sizeof(HMODULE);
+-			for (long i = 0; i < count; i++) {
+-				if (hmodules[i] == NULL)
+-					break;
+-				void* func = (void*)GetProcAddress(hmodules[i], "ENBGetSDKVersion");
+-				if (func) {
+-					enbmodule = hmodules[i];
+-					break;
+-				}
+-			}
+-		}
+-
+-		if (!enbmodule)
+-			return nullptr;
+-
+-		ENBAPI enbSDK = ENBAPI(enbmodule);
+-
+-		if (((enbSDK.GetSDKVersion() / 1000) % 10) == (static_cast<long>(a_ENBSDKVersion) / 1000) % 10) {
+-			return new ENBAPI(enbmodule);
+-		}
+-		return nullptr;
+-	}
+-}
++#pragma once
++
++#include "ENBSeriesSDK.h"
++
++using namespace ENB_SDK;
++
++namespace ENB_API
++{
++	#include <AntTweakBar.h>
++
++	// Available ENBSeries SDK versions
++	enum class SDKVersion : long
++	{
++		V1000 = 1000,
++		V1001 = 1001
++	};
++
++	// ENB Series' modder interface
++	class ENBAPI
++	{
++
++	public:
++
++		/// <summary>
++		/// Returns the version of the SDK used by the ENBSeries.<br/>
++		/// Guaranteed compatibility for all Xxxx versions only, for example 1025 will work with sdk version 1000-1025, 2025 will work with sdk version 2000-2025, etc.
++		/// </summary>
++		/// <returns>
++		/// Version of SDK used by the ENBSeries, 1000 means 1.0, 1001 means 1.01, etc.
++		/// </returns>
++		long GetSDKVersion()
++		{
++			return reinterpret_cast<_ENBGetSDKVersion>(GetProcAddress(enbmodule, "ENBGetSDKVersion"))();
++		}
++
++		ENBAPI(HMODULE a_enbmodule)
++		{
++			this->enbmodule = a_enbmodule;
++		}
++
++
++	protected:
++
++		HMODULE enbmodule = NULL;
++
++
++	};
++
++
++	class ENBSDK1000 : public ENBAPI
++	{
++
++	public:
++
++		/// <summary>
++		/// Returns the version of ENBSeries.
++		/// </summary>
++		/// <returns>
++		/// Version of ENBSeries, 279 means 0.279 etc.
++		/// </returns>
++		long GetVersion()
++		{
++			return reinterpret_cast<_ENBGetVersion>(GetProcAddress(enbmodule, "ENBGetVersion"))();
++		}
++
++		/// <summary>
++		/// Returns the unique ENBSeries game identifier.
++		/// </summary>
++		/// <returns>
++		/// Unique game identifier, for example ENBGAMEID_SKYRIM.
++		/// </returns>
++		long GetGameIdentifier()
++		{
++			return reinterpret_cast<_ENBGetGameIdentifier>(GetProcAddress(enbmodule, "ENBGetGameIdentifier"))();
++		}
++
++		/// <summary>
++		/// Adds a callback function which is executed by ENBSeries at certain moments. This helps to bypass potential bugs and may increase performance. 
++		/// </summary> 
++		void SetCallbackFunction(ENBCallbackFunction a_func)
++		{
++			reinterpret_cast<_ENBSetCallbackFunction>(GetProcAddress(enbmodule, "ENBSetCallbackFunction"))(a_func);
++		}
++
++		/// <summary> 
++		/// Get the value of a parameter.<br/>
++		/// Parameters may spawn or be deleted when the user is modifying shaders, so it's highly recommended to call this inside a callback function.</summary>
++		/// <param name="a_filename"> Use NULL to access shader variables instead of configuration files.</param>
++		/// <param name="a_outparam"> Structure which contains output parameters.</param>
++		/// <returns> False if failed because function arguments are invalid, parameter does not exist or is hidden.</returns>
++		bool GetParameter(char* a_filename, char* a_category, char* a_keyname, ENBParameter* a_outparam)
++		{
++			return reinterpret_cast<_ENBGetParameter>(GetProcAddress(enbmodule, "ENBGetParameter"))(a_filename, a_category, a_keyname, a_outparam);
++		}
++		bool GetParameter(const char* a_filename, const char* a_category, const char* a_keyname, ENBParameter* a_outparam)
++		{
++			return reinterpret_cast<_ENBGetParameterA>(GetProcAddress(enbmodule, "ENBGetParameter"))(a_filename, a_category, a_keyname, a_outparam);
++		}
++
++		/// <summary>
++		/// Set the value of a parameter.<br/>
++		/// Any values forced by this parameter can be saved by user in editor window, which means corruption of presets,
++		/// so it's highly recommended to warn users about that.
++		/// </summary>
++		/// <param name="a_filename"> Use NULL to access shader variables instead of configuration files.</param>
++		/// <returns> 
++		/// FALSE if failed, because function arguments are invalid, parameter not exist, hidden or read only.<br/>
++		/// FALSE if called outside of callback function to protect against graphical artifacts and crashes.
++		/// </returns>
++		bool SetParameter(char* a_filename, char* a_category, char* a_keyname, ENBParameter* a_inparam)
++		{
++			return reinterpret_cast<_ENBSetParameter>(GetProcAddress(enbmodule, "ENBSetParameter"))(a_filename, a_category, a_keyname, a_inparam);
++		}
++		bool SetParameter(char* a_filename, const char* a_category, const char* a_keyname, ENBParameter* a_inparam)
++		{
++			return reinterpret_cast<_ENBSetParameterA>(GetProcAddress(enbmodule, "ENBSetParameter"))(a_filename, a_category, a_keyname, a_inparam);
++		}
++
++
++	};
++
++	class ENBSDK1001 : public ENBSDK1000
++	{
++	public:
++
++
++		/// <summary>
++		/// Receive various objects for advanced programming.
++		/// </summary>
++		/// <returns>
++		/// NULL if called too early and not everything is initialized yet.
++		/// </returns>
++		ENBRenderInfo* GetRenderInfo()
++		{
++			return reinterpret_cast<_ENBGetRenderInfo>(GetProcAddress(enbmodule, "ENBGetRenderInfo"))();
++		}
++
++		/// <summary>
++		/// Receive various states of the mod.
++		/// </summary>
++		/// <returns>
++		/// Returns boolean or indexed values, depending from which state it was requested.
++		/// </returns>
++		long GetState(ENBStateType state)
++		{
++			return reinterpret_cast<_ENBStateType>(GetProcAddress(enbmodule, "ENBGetState"))(state);
++		}
++
++
++	};
++
++	class ENBSDKALT1001 : public ENBSDK1001
++	{
++	public:
++
++		typedef TwBar*      (*_TwNewBar)(const char* barName);
++		typedef int			(*_TwDeleteBar)(TwBar* bar);
++		typedef const char* (*_TwGetBarName)(const TwBar* bar);
++		typedef TwBar*		(*_TwGetBarByName)(const char* barName);
++		typedef int			(*_TwRefreshBar)(TwBar* bar);
++
++		TwBar* TwNewBar(const char* barName)
++		{
++			return reinterpret_cast<_TwNewBar>(GetProcAddress(enbmodule, "TwNewBar"))(barName);
++		}
++
++		int TwDeleteBar(TwBar* bar)
++		{
++			return reinterpret_cast<_TwDeleteBar>(GetProcAddress(enbmodule, "TwDeleteBar"))(bar);
++		}
++
++		TwBar* TwGetBarByName(const char* barName)
++		{
++			return reinterpret_cast<_TwGetBarByName>(GetProcAddress(enbmodule, "TwGetBarByName"))(barName);
++		}
++
++		int TwRefreshBar(TwBar* bar)
++		{
++			return reinterpret_cast<_TwRefreshBar>(GetProcAddress(enbmodule, "TwRefreshBar"))(bar);
++		}
++
++
++		typedef int (*_TwAddVarRW)(TwBar* bar, const char* name, TwType type, void* var, const char* def);
++		typedef int (*_TwAddVarRO)(TwBar* bar, const char* name, TwType type, const void* var, const char* def);
++		typedef int (*_TwAddVarCB)(TwBar* bar, const char* name, TwType type, TwSetVarCallback setCallback, TwGetVarCallback getCallback, void* clientData, const char* def);
++		typedef int (*_TwAddButton)(TwBar* bar, const char* name, TwButtonCallback callback, void* clientData, const char* def);
++		typedef int (*_TwAddSeparator)(TwBar* bar, const char* name, const char* def);
++		typedef int (*_TwRemoveVar)(TwBar* bar, const char* name);
++		typedef int (*_TwRemoveAllVars)(TwBar* bar);
++
++		int TwAddVarRW(TwBar* bar, const char* name, TwType type, void* var, const char* def)
++		{
++			return reinterpret_cast<_TwAddVarRW>(GetProcAddress(enbmodule, "TwAddVarRW"))(bar, name, type, var, def);
++		}
++
++		int TwAddVarRO(TwBar* bar, const char* name, TwType type, const void* var, const char* def)
++		{
++			return reinterpret_cast<_TwAddVarRO>(GetProcAddress(enbmodule, "TwAddVarRO"))(bar, name, type, var, def);
++		}
++
++		int TwAddVarCB(TwBar* bar, const char* name, TwType type, TwSetVarCallback setCallback, TwGetVarCallback getCallback, void* clientData, const char* def)
++		{
++			return reinterpret_cast<_TwAddVarCB>(GetProcAddress(enbmodule, "TwAddVarCB"))(bar, name, type, setCallback, getCallback, clientData, def);
++		}
++
++		int TwAddButton(TwBar* bar, const char* name, TwButtonCallback callback, void* clientData, const char* def)
++		{
++			return reinterpret_cast<_TwAddButton>(GetProcAddress(enbmodule, "TwAddButton"))(bar, name, callback, clientData, def);
++		}
++
++		int TwAddSeparator(TwBar* bar, const char* name, const char* def)
++		{
++			return reinterpret_cast<_TwAddSeparator>(GetProcAddress(enbmodule, "TwAddVarRO"))(bar, name, def);
++		}
++
++		int TwRemoveVar(TwBar* bar, const char* name)
++		{
++			return reinterpret_cast<_TwRemoveVar>(GetProcAddress(enbmodule, "TwRemoveVar"))(bar, name);
++		}
++
++		int TwRemoveAllVars(TwBar* bar)
++		{
++			return reinterpret_cast<_TwRemoveAllVars>(GetProcAddress(enbmodule, "TwRemoveAllVars"))(bar);
++		}
++
++
++		typedef int (*_TwGetParam)(TwBar* bar, const char* varName, const char* paramName, TwParamValueType paramValueType, unsigned int outValueMaxCount, void* outValues);
++		typedef int (*_TwSetParam)(TwBar* bar, const char* varName, const char* paramName, TwParamValueType paramValueType, unsigned int inValueCount, const void* inValues);
++
++		int TwGetParam(TwBar* bar, const char* varName, const char* paramName, TwParamValueType paramValueType, unsigned int outValueMaxCount, void* outValues)
++		{
++			return reinterpret_cast<_TwGetParam>(GetProcAddress(enbmodule, "TwGetParam"))(bar, varName, paramName, paramValueType, outValueMaxCount, outValues);
++		}
++
++		int TwSetParam(TwBar* bar, const char* varName, const char* paramName, TwParamValueType paramValueType, unsigned int inValueCount, const void* inValues)
++		{
++			return reinterpret_cast<_TwSetParam>(GetProcAddress(enbmodule, "TwSetParam"))(bar, varName, paramName, paramValueType, inValueCount, inValues);
++		}
++
++	};
++
++	/// <summary>
++	/// Request the ENB SDK interface.
++	/// Recommended: Send your request during or after SKSEMessagingInterface::kMessage_PostLoad to make sure the dll has already been loaded
++	/// </summary>
++	/// <param name="a_ENBSDKVersion">The SDK version to request</param>
++	/// <returns>The pointer to the API singleton, or nullptr if request failed</returns>
++	[[nodiscard]] static inline void* RequestENBAPI(const SDKVersion a_ENBSDKVersion = SDKVersion::V1001)
++	{
++		DWORD   cb = 1000 * sizeof(HMODULE);
++		DWORD   cbNeeded = 0;
++		HMODULE enbmodule = NULL;
++		HMODULE hmodules[1000];
++		HANDLE  hproc = GetCurrentProcess();
++		for (long i = 0; i < 1000; i++) hmodules[i] = NULL;
++		// Find the proper library using the existance of an exported function, because several with the same name may exist
++		if (EnumProcessModules(hproc, hmodules, cb, &cbNeeded)) {
++			long count = cbNeeded / sizeof(HMODULE);
++			for (long i = 0; i < count; i++) {
++				if (hmodules[i] == NULL)
++					break;
++				void* func = (void*)GetProcAddress(hmodules[i], "ENBGetSDKVersion");
++				if (func) {
++					enbmodule = hmodules[i];
++					break;
++				}
++			}
++		}
++
++		if (!enbmodule)
++			return nullptr;
++
++		ENBAPI enbSDK = ENBAPI(enbmodule);
++
++		if (((enbSDK.GetSDKVersion() / 1000) % 10) == (static_cast<long>(a_ENBSDKVersion) / 1000) % 10) {
++			return new ENBAPI(enbmodule);
++		}
++		return nullptr;
++	}
++}
+diff --git a/ENBSeriesSDK.h b/ENBSeriesSDK.h
+index 3b08bde..1dc6e3e 100644
+--- a/ENBSeriesSDK.h
++++ b/ENBSeriesSDK.h
+@@ -1,155 +1,157 @@
+-// ENBSeries SDK http://enbdev.com/
+-// Original author: Boris Vorontsov, 2017
+-// Modified by @doodlum
+-// Main header file with parameters and functions definitions
+-#pragma once
+-
+-namespace ENB_SDK
+-{
+-
+-	enum class ENBParameterType : long
+-	{
+-		ENBParam_NONE = 0,                //invalid
+-		ENBParam_FLOAT = 1,               //1 float
+-		ENBParam_INT = 2,                 //1 int
+-		ENBParam_HEX = 3,                 //1 DWORD
+-		ENBParam_BOOL = 4,                //1 BOOL
+-		ENBParam_COLOR3 = 5,              //3 float
+-		ENBParam_COLOR4 = 6,              //4 float
+-		ENBParam_VECTOR3 = 7,             //3 float
+-		ENBParam_FORCEDWORD = 0x7fffffff  //unused
+-	};
+-
+-	inline long ENBParameterTypeToSize(ENBParameterType type)
+-	{
+-		long size = 0;
+-		if (type == ENBParameterType::ENBParam_FLOAT)
+-			size = 4;
+-		if (type == ENBParameterType::ENBParam_INT)
+-			size = 4;
+-		if (type == ENBParameterType::ENBParam_HEX)
+-			size = 4;
+-		if (type == ENBParameterType::ENBParam_BOOL)
+-			size = 4;
+-		if (type == ENBParameterType::ENBParam_COLOR3)
+-			size = 4 * 3;
+-		if (type == ENBParameterType::ENBParam_COLOR4)
+-			size = 4 * 4;
+-		if (type == ENBParameterType::ENBParam_VECTOR3)
+-			size = 4 * 3;
+-		return size;
+-	}
+-
+-	struct ENBParameter
+-	{
+-		unsigned char    Data[16];  //array of variables BOOL, INT, FLOAT, max vector of 4 elements
+-		unsigned long    Size;      //4*4 max
+-		ENBParameterType Type;
+-
+-		ENBParameter()
+-		{
+-			for (DWORD k = 0; k < 16; k++) Data[k] = 0;
+-			Size = 0;
+-			Type = ENBParameterType::ENBParam_NONE;
+-		}
+-	};
+-
+-	enum class ENBCallbackType : long
+-	{
+-		ENBCallback_EndFrame = 1,    //called at the end of frame, before displaying result on the screen
+-		ENBCallback_BeginFrame = 2,  //called after frame was displayed, time between end and begin frame may be big enough to execute something heavy in separate thread
+-		ENBCallback_PreSave = 3,     //called before user trying to save config, useful for restoring original parameters
+-		ENBCallback_PostLoad = 4,    //called when parameters are created and loaded, useful for saving original parameters
+-		//v1001:
+-		ENBCallback_OnInit = 5,     //called when mod is initialized completely, but nothing yet processed, all new resources must be created by plugin
+-		ENBCallback_OnExit = 6,     //called when game or mod are about to close, all new resources must be deleted by plugin
+-		ENBCallback_PreReset = 7,   //called when game or mod destroy internal objects (display mode changes for example), need to destroy all objects in plugin. may not be called ever, but must be handled in some similar way to OnExit
+-		ENBCallback_PostReset = 8,  //called when game or mod re-create internal objects (after display mode changes for example), need to create all objects in plugin again, including pointers to interfaces of d3d. may not be called ever, but must be handled in some similar way to OnInit
+-
+-		ENBCallback_FORCEDWORD = 0x7fffffff  //unused
+-	};
+-
+-	//v1001:
+-	enum class ENBStateType : long
+-	{
+-		ENBState_IsEditorActive = 1,      //is mod editor windows are opened
+-		ENBState_IsEffectsWndActive = 2,  //is shader effects window of mod editor opened
+-		ENBState_CursorPosX = 3,          //position of editor cursor (may not be the same as game cursor)
+-		ENBState_CursorPosY = 4,          //position of editor cursor (may not be the same as game cursor)
+-		ENBState_MouseLeft = 5,           //mouse key state boolean pressed or not
+-		ENBState_MouseRight = 6,          //mouse key state boolean pressed or not
+-		ENBState_MouseMiddle = 7,         //mouse key state boolean pressed or not
+-
+-		ENBState_FORCEDWORD = 0x7fffffff  //unused
+-	};
+-
+-	//v1001:
+-	struct ENBRenderInfo
+-	{
+-		//these objects actually pointers to ENBSeries wrapped classes to make sure every change is tracked by mod and restored later
+-		void* d3d11device;         //ID3D11Device
+-		void* d3d11devicecontext;  //ID3D11DeviceContext
+-		void* dxgiswapchain;       //IDXGISwapChain
+-
+-		DWORD ScreenSizeX = NULL;
+-		DWORD ScreenSizeY = NULL;
+-
+-		ENBRenderInfo()
+-		{
+-			d3d11device = NULL;
+-			d3d11devicecontext = NULL;
+-			dxgiswapchain = NULL;
+-			ScreenSizeX = 0;
+-			ScreenSizeX = 0;
+-		}
+-	};
+-
+-	//Returns version of SDK used by the ENBSeries, 1000 means 1.0, 1001 means 1.01, etc
+-	//Guaranteed compatibility for all Xxxx versions only, for example 1025 will work with sdk version 1000-1025,
+-	//2025 will work with sdk version 2000-2025, etc. In best cases it's equal to ENBSDKVERSION
+-	typedef long (*_ENBGetSDKVersion)();
+-
+-	//Returns version of the ENBSeries, 279 means 0.279
+-	typedef long (*_ENBGetVersion)();
+-
+-	//Returns unique game identifier, for example ENBGAMEID_SKYRIM
+-	typedef long (*_ENBGetGameIdentifier)();
+-
+-	//Assign callback function which is executed by ENBSeries at certain moments. This helps to bypass potential bugs
+-	//and increase performance. Argument calltype must be used to select proper action.
+-	//void WINAPI	CallbackFunction(ENBCallbackType calltype); //example function
+-	typedef void(WINAPI* ENBCallbackFunction)(ENBCallbackType calltype);  //declaration of callback function
+-	typedef void (*_ENBSetCallbackFunction)(ENBCallbackFunction func);
+-
+-	//Receive value of parameter
+-	//Input "filename" could be NULL to access shader variables instead of configuration files.
+-	//Return FALSE if failed, because function arguments are invalid, parameter not exist or hidden. Also parameters
+-	//may spawn or to be deleted when user modifying shaders, so highly recommended to call it inside callback function.
+-	//For shader variables set filename=NULL
+-	typedef bool (*_ENBGetParameter)(char* filename, char* category, char* keyname, ENBParameter* outparam);
+-
+-	//Set value of parameter
+-	//Input "filename" could be NULL to access shader variables instead of configuration files
+-	//Returns FALSE if failed, because function arguments are invalid, parameter not exist, hidden or read only. Also parameters
+-	//may spawn or to be deleted when user modifying shaders.
+-	//Return FALSE if called outside of callback function to protect against graphical artifacts and crashes.
+-	//WARNING! Any values forced by this parameter can be saved by user in editor window, which means corruption of presets,
+-	//so it's highly recommended to warn users about that.
+-	//For shader variables set filename=NULL
+-	typedef bool (*_ENBSetParameter)(char* filename, char* category, char* keyname, ENBParameter* inparam);
+-
+-	//v1001:
+-	//Receive various objects for advanced programming
+-	//Return NULL if called too early and not everything initialized yet
+-	typedef ENBRenderInfo* (*_ENBGetRenderInfo)();
+-
+-	//Receive various states of the mod
+-	//Return boolean or indexed values, depending from which state requested
+-	typedef long (*_ENBStateType)(ENBStateType state);
+-
+-	//Returns version of SDK used by the ENBSeries, 1000 means 1.0, 1001 means 1.01, etc
+-	//Guaranteed compatibility for all Xxxx versions only, for example 1025 will work with sdk version 1000-1025,
+-	//2025 will work with sdk version 2000-2025, etc. In best cases it's equal to ENBSDKVERSION
+-	typedef long (*_ENBGetSDKVersion)();
+-
+-}
++// ENBSeries SDK http://enbdev.com/
++// Original author: Boris Vorontsov, 2017
++// Modified by @doodlum
++// Main header file with parameters and functions definitions
++#pragma once
++
++namespace ENB_SDK
++{
++
++	enum class ENBParameterType : long
++	{
++		ENBParam_NONE = 0,                //invalid
++		ENBParam_FLOAT = 1,               //1 float
++		ENBParam_INT = 2,                 //1 int
++		ENBParam_HEX = 3,                 //1 DWORD
++		ENBParam_BOOL = 4,                //1 BOOL
++		ENBParam_COLOR3 = 5,              //3 float
++		ENBParam_COLOR4 = 6,              //4 float
++		ENBParam_VECTOR3 = 7,             //3 float
++		ENBParam_FORCEDWORD = 0x7fffffff  //unused
++	};
++
++	inline long ENBParameterTypeToSize(ENBParameterType type)
++	{
++		long size = 0;
++		if (type == ENBParameterType::ENBParam_FLOAT)
++			size = 4;
++		if (type == ENBParameterType::ENBParam_INT)
++			size = 4;
++		if (type == ENBParameterType::ENBParam_HEX)
++			size = 4;
++		if (type == ENBParameterType::ENBParam_BOOL)
++			size = 4;
++		if (type == ENBParameterType::ENBParam_COLOR3)
++			size = 4 * 3;
++		if (type == ENBParameterType::ENBParam_COLOR4)
++			size = 4 * 4;
++		if (type == ENBParameterType::ENBParam_VECTOR3)
++			size = 4 * 3;
++		return size;
++	}
++
++	struct ENBParameter
++	{
++		unsigned char    Data[16];  //array of variables BOOL, INT, FLOAT, max vector of 4 elements
++		unsigned long    Size;      //4*4 max
++		ENBParameterType Type;
++
++		ENBParameter()
++		{
++			for (DWORD k = 0; k < 16; k++) Data[k] = 0;
++			Size = 0;
++			Type = ENBParameterType::ENBParam_NONE;
++		}
++	};
++
++	enum class ENBCallbackType : long
++	{
++		ENBCallback_EndFrame = 1,    //called at the end of frame, before displaying result on the screen
++		ENBCallback_BeginFrame = 2,  //called after frame was displayed, time between end and begin frame may be big enough to execute something heavy in separate thread
++		ENBCallback_PreSave = 3,     //called before user trying to save config, useful for restoring original parameters
++		ENBCallback_PostLoad = 4,    //called when parameters are created and loaded, useful for saving original parameters
++		//v1001:
++		ENBCallback_OnInit = 5,     //called when mod is initialized completely, but nothing yet processed, all new resources must be created by plugin
++		ENBCallback_OnExit = 6,     //called when game or mod are about to close, all new resources must be deleted by plugin
++		ENBCallback_PreReset = 7,   //called when game or mod destroy internal objects (display mode changes for example), need to destroy all objects in plugin. may not be called ever, but must be handled in some similar way to OnExit
++		ENBCallback_PostReset = 8,  //called when game or mod re-create internal objects (after display mode changes for example), need to create all objects in plugin again, including pointers to interfaces of d3d. may not be called ever, but must be handled in some similar way to OnInit
++
++		ENBCallback_FORCEDWORD = 0x7fffffff  //unused
++	};
++
++	//v1001:
++	enum class ENBStateType : long
++	{
++		ENBState_IsEditorActive = 1,      //is mod editor windows are opened
++		ENBState_IsEffectsWndActive = 2,  //is shader effects window of mod editor opened
++		ENBState_CursorPosX = 3,          //position of editor cursor (may not be the same as game cursor)
++		ENBState_CursorPosY = 4,          //position of editor cursor (may not be the same as game cursor)
++		ENBState_MouseLeft = 5,           //mouse key state boolean pressed or not
++		ENBState_MouseRight = 6,          //mouse key state boolean pressed or not
++		ENBState_MouseMiddle = 7,         //mouse key state boolean pressed or not
++
++		ENBState_FORCEDWORD = 0x7fffffff  //unused
++	};
++
++	//v1001:
++	struct ENBRenderInfo
++	{
++		//these objects actually pointers to ENBSeries wrapped classes to make sure every change is tracked by mod and restored later
++		void* d3d11device;         //ID3D11Device
++		void* d3d11devicecontext;  //ID3D11DeviceContext
++		void* dxgiswapchain;       //IDXGISwapChain
++
++		DWORD ScreenSizeX = NULL;
++		DWORD ScreenSizeY = NULL;
++
++		ENBRenderInfo()
++		{
++			d3d11device = NULL;
++			d3d11devicecontext = NULL;
++			dxgiswapchain = NULL;
++			ScreenSizeX = 0;
++			ScreenSizeX = 0;
++		}
++	};
++
++	//Returns version of SDK used by the ENBSeries, 1000 means 1.0, 1001 means 1.01, etc
++	//Guaranteed compatibility for all Xxxx versions only, for example 1025 will work with sdk version 1000-1025,
++	//2025 will work with sdk version 2000-2025, etc. In best cases it's equal to ENBSDKVERSION
++	typedef long (*_ENBGetSDKVersion)();
++
++	//Returns version of the ENBSeries, 279 means 0.279
++	typedef long (*_ENBGetVersion)();
++
++	//Returns unique game identifier, for example ENBGAMEID_SKYRIM
++	typedef long (*_ENBGetGameIdentifier)();
++
++	//Assign callback function which is executed by ENBSeries at certain moments. This helps to bypass potential bugs
++	//and increase performance. Argument calltype must be used to select proper action.
++	//void WINAPI	CallbackFunction(ENBCallbackType calltype); //example function
++	typedef void(WINAPI* ENBCallbackFunction)(ENBCallbackType calltype);  //declaration of callback function
++	typedef void (*_ENBSetCallbackFunction)(ENBCallbackFunction func);
++
++	//Receive value of parameter
++	//Input "filename" could be NULL to access shader variables instead of configuration files.
++	//Return FALSE if failed, because function arguments are invalid, parameter not exist or hidden. Also parameters
++	//may spawn or to be deleted when user modifying shaders, so highly recommended to call it inside callback function.
++	//For shader variables set filename=NULL
++	typedef bool (*_ENBGetParameter)(char* filename, char* category, char* keyname, ENBParameter* outparam);
++	typedef bool (*_ENBGetParameterA)(const char* filename, const char* category, const char* keyname, ENBParameter* outparam);
++
++	//Set value of parameter
++	//Input "filename" could be NULL to access shader variables instead of configuration files
++	//Returns FALSE if failed, because function arguments are invalid, parameter not exist, hidden or read only. Also parameters
++	//may spawn or to be deleted when user modifying shaders.
++	//Return FALSE if called outside of callback function to protect against graphical artifacts and crashes.
++	//WARNING! Any values forced by this parameter can be saved by user in editor window, which means corruption of presets,
++	//so it's highly recommended to warn users about that.
++	//For shader variables set filename=NULL
++	typedef bool (*_ENBSetParameter)(char* filename, char* category, char* keyname, ENBParameter* inparam);
++	typedef bool (*_ENBSetParameterA)(char* filename, const char* category, const char* keyname, ENBParameter* inparam);
++
++	//v1001:
++	//Receive various objects for advanced programming
++	//Return NULL if called too early and not everything initialized yet
++	typedef ENBRenderInfo* (*_ENBGetRenderInfo)();
++
++	//Receive various states of the mod
++	//Return boolean or indexed values, depending from which state requested
++	typedef long (*_ENBStateType)(ENBStateType state);
++
++	//Returns version of SDK used by the ENBSeries, 1000 means 1.0, 1001 means 1.01, etc
++	//Guaranteed compatibility for all Xxxx versions only, for example 1025 will work with sdk version 1000-1025,
++	//2025 will work with sdk version 2000-2025, etc. In best cases it's equal to ENBSDKVERSION
++	typedef long (*_ENBGetSDKVersion)();
++
++}
+diff --git a/LICENSE b/LICENSE
+index 3e6d1ba..8760f51 100644
+--- a/LICENSE
++++ b/LICENSE
+@@ -1,21 +1,21 @@
+-MIT License
+-
+-Copyright (c) 2022 Tim
+-
+-Permission is hereby granted, free of charge, to any person obtaining a copy
+-of this software and associated documentation files (the "Software"), to deal
+-in the Software without restriction, including without limitation the rights
+-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+-copies of the Software, and to permit persons to whom the Software is
+-furnished to do so, subject to the following conditions:
+-
+-The above copyright notice and this permission notice shall be included in all
+-copies or substantial portions of the Software.
+-
+-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+-SOFTWARE.
++MIT License
++
++Copyright (c) 2022 Tim
++
++Permission is hereby granted, free of charge, to any person obtaining a copy
++of this software and associated documentation files (the "Software"), to deal
++in the Software without restriction, including without limitation the rights
++to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
++copies of the Software, and to permit persons to whom the Software is
++furnished to do so, subject to the following conditions:
++
++The above copyright notice and this permission notice shall be included in all
++copies or substantial portions of the Software.
++
++THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
++AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
++OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
++SOFTWARE.
+diff --git a/README.md b/README.md
+index 453912c..a860f2a 100644
+--- a/README.md
++++ b/README.md
+@@ -1,48 +1,48 @@
+-# enb-api
+-ENBSeries API, done in the style of TrueDirectionalMovement and other SKSE APIs
+-
+-API should work for any xSE version, but only SKSE was "tested"
+-
+-# Accessing the API
+-
+-Register your plugin for SKSE messaging interface  
+-```
+-SKSE::GetMessagingInterface()->RegisterListener(MessageHandler);
+-```  
+-  
+-Request API on `kPostLoad`  
+-Store the API handle and re-use it
+-
+-```
+-ENB_API::ENBSDK1001* g_ENB = nullptr;
+-
+-void MessageHandler(SKSE::MessagingInterface::Message* a_msg)
+-{
+-	switch (a_msg->type) {
+-		case SKSE::MessagingInterface::kPostLoad:
+-
+-			g_ENB = reinterpret_cast<ENB_API::ENBSDK1001*>(ENB_API::RequestENBAPI(ENB_API::SDKVersion::V1001));
+-			if (g_ENB) 
+-				logger::info("Obtained ENB API");
+-			else
+-				logger::info("Unable to acquire ENB API");
+-
+-			break;
+-	}
+-}
+-```
+-
+-# Using the API
+-
+-All API functions have been documented.
+-
+-Check `ENBSeriesAPI.h` for function definitions  
+-Check `ENBSeriesSDK.h` for type definitions (shared with ENBSeries)
+-
+-Example
+-```
+-if (g_ENB)
+-  logger::info("Using ENB SDK version {}"sv), g_ENB->GetSDKVersion())
+-```
+-
+-
++# enb-api
++ENBSeries API, done in the style of TrueDirectionalMovement and other SKSE APIs
++
++API should work for any xSE version, but only SKSE was "tested"
++
++# Accessing the API
++
++Register your plugin for SKSE messaging interface  
++```
++SKSE::GetMessagingInterface()->RegisterListener(MessageHandler);
++```  
++  
++Request API on `kPostLoad`  
++Store the API handle and re-use it
++
++```
++ENB_API::ENBSDK1001* g_ENB = nullptr;
++
++void MessageHandler(SKSE::MessagingInterface::Message* a_msg)
++{
++	switch (a_msg->type) {
++		case SKSE::MessagingInterface::kPostLoad:
++
++			g_ENB = reinterpret_cast<ENB_API::ENBSDK1001*>(ENB_API::RequestENBAPI(ENB_API::SDKVersion::V1001));
++			if (g_ENB) 
++				logger::info("Obtained ENB API");
++			else
++				logger::info("Unable to acquire ENB API");
++
++			break;
++	}
++}
++```
++
++# Using the API
++
++All API functions have been documented.
++
++Check `ENBSeriesAPI.h` for function definitions  
++Check `ENBSeriesSDK.h` for type definitions (shared with ENBSeries)
++
++Example
++```
++if (g_ENB)
++  logger::info("Using ENB SDK version {}"sv), g_ENB->GetSDKVersion())
++```
++
++

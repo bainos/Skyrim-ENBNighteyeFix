@@ -1,7 +1,7 @@
 ﻿# BainosNighteyeFix - Copy files to mod directory
 
 $modDestPath = "E:\Lorerim\mods\BainosNighteyeMod"
-$localDestPath = "C:\dev\BainosNighteyeFix\BainosNighteyeMod"
+$localDestPath = "mod"
 
 # Define source and destination pairs
 $fileCopies = @(

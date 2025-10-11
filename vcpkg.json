@@ -4,6 +4,7 @@
   "dependencies": [
     "commonlibsse-ng-ae",
     "spdlog",
-    "iniparser"
+    "iniparser",
+    "enb-api"
   ]
 }

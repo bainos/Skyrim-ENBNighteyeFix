@@ -10,11 +10,11 @@ $fileCopies = @(
         Dest = "$modDestPath\SKSE\plugins\BainosNighteyeFix.dll"
     },
     @{
-        Source = "BainosNighteyeMod\Root\enbseries\enbeffect.fx"
+        Source = "mod\Root\enbseries\enbeffect.fx"
         Dest = "$modDestPath\Root\enbseries\enbeffect.fx"
     },
     @{
-        Source = "BainosNighteyeMod\SKSE\plugins\BainosNighteyeFix.ini"
+        Source = "mod\SKSE\plugins\BainosNighteyeFix.ini"
         Dest = "$modDestPath\SKSE\plugins\BainosNighteyeFix.ini"
     },
     @{

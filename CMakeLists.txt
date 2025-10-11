@@ -11,6 +11,7 @@ set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
 find_package(CommonLibSSE CONFIG REQUIRED)
 find_package(spdlog REQUIRED CONFIG)
+find_package(enb-api CONFIG REQUIRED)
 
 # Manual iniparser integration
 find_path(INIPARSER_INCLUDE_DIR iniparser/iniparser.h)
@@ -35,12 +36,12 @@ target_compile_options(${PROJECT_NAME} PRIVATE /FI${PATCH_HEADER_PATH_NATIVE})
 target_link_libraries(${PROJECT_NAME} PRIVATE
     CommonLibSSE::CommonLibSSE
     spdlog::spdlog
+    enb-api::enb-api
     ${INIPARSER_LIBRARY}
 )
 
-# Add ENB API and iniparser include directories
+# Add iniparser include directory
 target_include_directories(${PROJECT_NAME} PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/extern/enb-api
     ${INIPARSER_INCLUDE_DIR}
 )
 

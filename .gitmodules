@@ -1,3 +1,0 @@
-[submodule "extern/enb-api"]
-	path = extern/enb-api
-	url = https://github.com/bainos/enb-api.git

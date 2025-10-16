@@ -5,6 +5,10 @@ build/
 .vscode/
 .idea/
 
+# Packaging
+dist/
+temp_package/
+
 # Claude Code
 .claude/
 

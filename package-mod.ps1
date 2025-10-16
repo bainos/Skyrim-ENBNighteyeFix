@@ -50,7 +50,8 @@ foreach ($variant in $variants) {
     $variantName = $variant.Name
     $includeENB = $variant.IncludeENBFiles
 
-    Write-Host "`nPackaging: $variantName" -ForegroundColor Green
+    Write-Host ""
+    Write-Host "Packaging: $variantName" -ForegroundColor Green
 
     # Create staging directory structure
     $stagingRoot = Join-Path $tempDir $variantName
@@ -63,17 +64,18 @@ foreach ($variant in $variants) {
     # Copy SKSE plugin files
     Copy-Item -Path $dllSource -Destination (Join-Path $sksePluginsDir "BainosNighteyeFix.dll")
     Copy-Item -Path $iniSource -Destination (Join-Path $sksePluginsDir "ENBNighteyeFix.ini")
-    Write-Host "  ✓ Copied SKSE plugin files" -ForegroundColor Gray
+    Write-Host "  [OK] Copied SKSE plugin files" -ForegroundColor Gray
 
     # Copy ENB files if needed
     if ($includeENB) {
         if ((Test-Path $enbEffectFx) -and (Test-Path $enbEffectIni)) {
             Copy-Item -Path $enbEffectFx -Destination (Join-Path $enbSeriesDir "enbeffect.fx")
             Copy-Item -Path $enbEffectIni -Destination (Join-Path $enbSeriesDir "enbeffect.fx.ini")
-            Write-Host "  ✓ Copied ENB effect files" -ForegroundColor Gray
+            Write-Host "  [OK] Copied ENB effect files" -ForegroundColor Gray
         }
-    } else {
-        Write-Host "  ✓ Created empty enbseries folder" -ForegroundColor Gray
+    }
+    else {
+        Write-Host "  [OK] Created empty enbseries folder" -ForegroundColor Gray
     }
 
     # Create zip file
@@ -85,14 +87,17 @@ foreach ($variant in $variants) {
     Compress-Archive -Path $stagingRoot -DestinationPath $zipPath -CompressionLevel Optimal
 
     $zipInfo = Get-Item $zipPath
-    Write-Host "  ✓ Created: $($zipInfo.Name) ($([math]::Round($zipInfo.Length / 1KB, 2)) KB)" -ForegroundColor Green
+    $sizeKB = [math]::Round($zipInfo.Length / 1KB, 2)
+    Write-Host "  [OK] Created: $($zipInfo.Name) ($sizeKB KB)" -ForegroundColor Green
 }
 
 # Cleanup
-Write-Host "`nCleaning up..." -ForegroundColor Cyan
+Write-Host ""
+Write-Host "Cleaning up..." -ForegroundColor Cyan
 Remove-Item -Path $tempDir -Recurse -Force
 
-Write-Host "`nPackaging complete! Files created in '$outputDir':" -ForegroundColor Green
+Write-Host ""
+Write-Host "Packaging complete! Files created in '$outputDir':" -ForegroundColor Green
 Get-ChildItem $outputDir -Filter "*.zip" | ForEach-Object {
     Write-Host "  - $($_.Name)" -ForegroundColor White
 }

@@ -22,7 +22,7 @@ struct Config {
     }
 
     void Load() {
-        const char* iniPath = "Data/SKSE/Plugins/BainosNighteyeFix.ini";
+        const char* iniPath = "Data/SKSE/Plugins/ENBNighteyeFix.ini";
         dictionary* ini = iniparser_load(iniPath);
 
         if (ini) {

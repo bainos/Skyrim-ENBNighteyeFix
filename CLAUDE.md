@@ -61,7 +61,7 @@ Event OnEffectStart(Actor akTarget, Actor akCaster)
 - Target: x64 Windows
 
 ## Configuration
-- **File**: `Data/SKSE/Plugins/BainosNighteyeFix.ini`
+- **File**: `Data/SKSE/Plugins/ENBNighteyeFix.ini`
 - **Settings**:
   - `NightEyeSpellFormID` - FormID of spell to monitor (default: 0x000AA01D)
 - Config loaded on plugin initialization with fallback to defaults

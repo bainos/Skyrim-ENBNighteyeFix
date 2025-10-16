@@ -3,6 +3,8 @@
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/basic_file_sink.h>
 
+#include <set>
+
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <Psapi.h>
@@ -12,7 +14,7 @@
 
 // Configuration
 struct Config {
-    RE::FormID nightEyeSpellFormID = 0x000AA01D;  // Default: vanilla Night Eye
+    std::set<RE::FormID> nightEyeSpellFormIDs;
 
     static Config* GetSingleton() {
         static Config instance;
@@ -26,24 +28,43 @@ struct Config {
         if (ini) {
             spdlog::info("Loading config from {}", iniPath);
 
-            // Read NightEyeSpellFormID
-            const char* formIDStr = iniparser_getstring(ini, "General:NightEyeSpellFormID", nullptr);
-            if (formIDStr) {
-                // Parse hex string (e.g., "0x000AA01D")
-                unsigned int formID = 0;
-                if (sscanf(formIDStr, "0x%X", &formID) == 1 || sscanf(formIDStr, "%X", &formID) == 1) {
-                    nightEyeSpellFormID = static_cast<RE::FormID>(formID);
-                    spdlog::info("  NightEyeSpellFormID = 0x{:08X}", nightEyeSpellFormID);
-                } else {
-                    spdlog::warn("  Failed to parse NightEyeSpellFormID, using default: 0x{:08X}", nightEyeSpellFormID);
+            // Enumerate all keys in [General] section
+            int nkeys = iniparser_getsecnkeys(ini, "general");
+            if (nkeys > 0) {
+                const char** keys = (const char**)malloc(nkeys * sizeof(const char*));
+                if (keys) {
+                    iniparser_getseckeys(ini, "general", keys);
+
+                    for (int i = 0; i < nkeys; ++i) {
+                        const char* key = keys[i];
+                        const char* value = iniparser_getstring(ini, key, nullptr);
+
+                        if (value) {
+                            // Parse hex FormID
+                            unsigned int formID = 0;
+                            if (sscanf(value, "0x%X", &formID) == 1 || sscanf(value, "%X", &formID) == 1) {
+                                nightEyeSpellFormIDs.insert(static_cast<RE::FormID>(formID));
+
+                                // Extract spell name from key (after "general:")
+                                const char* spellName = strchr(key, ':');
+                                spellName = spellName ? spellName + 1 : key;
+                                spdlog::info("  {} = 0x{:08X}", spellName, formID);
+                            } else {
+                                spdlog::warn("  Failed to parse value for key: {}", key);
+                            }
+                        }
+                    }
+                    free(keys);
                 }
-            } else {
-                spdlog::info("  NightEyeSpellFormID not found, using default: 0x{:08X}", nightEyeSpellFormID);
+            }
+
+            if (nightEyeSpellFormIDs.empty()) {
+                spdlog::warn("  No valid Night Eye spells found, plugin will not function");
             }
 
             iniparser_freedict(ini);
         } else {
-            spdlog::warn("Config file not found: {}, using defaults", iniPath);
+            spdlog::warn("Config file not found: {}", iniPath);
         }
     }
 };
@@ -145,7 +166,8 @@ public:
             return RE::BSEventNotifyControl::kContinue;
         }
 
-        if (event->baseObject == Config::GetSingleton()->nightEyeSpellFormID) {
+        auto& spellIDs = Config::GetSingleton()->nightEyeSpellFormIDs;
+        if (spellIDs.find(event->baseObject) != spellIDs.end()) {
             if (event->equipped) {
                 spdlog::info("Night Eye EQUIPPED");
                 RE::DebugNotification("Night Eye: ON");

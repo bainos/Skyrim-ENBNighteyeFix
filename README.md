@@ -58,6 +58,72 @@ Contains only the SKSE plugin without shader files. Use this variant if:
 - You want to customize the visual effects yourself
 - Your ENB preset already has compatible Night Vision shader code
 
+#### Patch details
+
+I recommend looking at the `enbeffect.fx` sipped with the *RUBY END patch* as reference/example.
+
+Following code goes somewhere before the `PS_Draw` function in `enbeffect.fx` file.
+It a rework from Phinix patch and the key point is the `KNActive` hidden param.
+
+```c
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//Khajiit Nighteye Adjustment
+int		KNEA 				< string UIName="-------------------NIGHTEYE ADJUSTMENT"; string UIWidget="spinner"; int UIMin=0; int UIMax=0;> = {0.0};
+bool	KNEnable		<string UIName = "Use Nighteye Fix";>																		= {false};
+bool	KNActive		<string UIName = "KNActive"; bool UIVisible=false;>                                                          = {false};
+		float3	KNBalance		<string UIName="Nighteye Balance";string UIWidget="Color";>													= {0.537, 0.647, 1};
+		float	KNSaturationInterior	<string UIName="Nighteye SaturationInterior";string UIWidget="Spinner";float UIMin=0.0;float UIMax=10.0;>			= {1.0};
+		float	KNSaturationExterior	<string UIName="Nighteye SaturationExterior";string UIWidget="Spinner";float UIMin=0.0;float UIMax=10.0;>			= {1.0};
+		float	KNBrightnessInterior	<string UIName="Nighteye BrightnessInterior";string UIWidget="Spinner";float UIMin=-5.0;float UIMax=5.0;>			= {0.0};
+        float	KNBrightnessExterior	<string UIName="Nighteye BrightnessExterior";string UIWidget="Spinner";float UIMin=-5.0;float UIMax=5.0;>			= {0.0};
+		float	KNContrastInterior		<string UIName="Nighteye ContrastInterior";string UIWidget="Spinner";float UIMin=0.0;float UIMax=5.0;>				= {0.99};
+		float	KNContrastExterior		<string UIName="Nighteye ContrastExterior";string UIWidget="Spinner";float UIMin=0.0;float UIMax=5.0;>				= {0.99};
+		float	KNInBlackInterior		<string UIName="Nighteye Low ClipInterior";string UIWidget="Spinner";float UIMin=0.0;float UIMax=1.0;>				= {0.0};
+		float	KNInBlackExterior		<string UIName="Nighteye Low ClipExterior";string UIWidget="Spinner";float UIMin=0.0;float UIMax=1.0;>				= {0.0};
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+```
+
+The following code goes directly in the `PS_Draw` function
+
+```c
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////		
+	
+        float KNSaturation = lerp( KNSaturationExterior, KNSaturationInterior, EInteriorFactor );
+		float KNBrightness = lerp( KNBrightnessExterior, KNBrightnessInterior, EInteriorFactor );
+		float KNContrast = lerp( KNContrastExterior, KNContrastInterior, EInteriorFactor );
+		float KNInBlack = lerp( KNInBlackExterior, KNInBlackInterior, EInteriorFactor );
+		//Khajiit Nighteye Correction by Phinix
+			float4 kncolor = color;
+		// color balance	
+			float3 knsat = KNBalance;
+			float3 knoldcol=kncolor.xyz;
+			kncolor.xyz *= knsat;
+			float3 kngrey = float3(0.333,0.333,0.333);
+			kncolor.xyz += (knoldcol.x-(knoldcol.x*knsat.x)) * kngrey.x;
+			kncolor.xyz += (knoldcol.y-(knoldcol.y*knsat.y)) * kngrey.y;
+			kncolor.xyz += (knoldcol.z-(knoldcol.z*knsat.z)) * kngrey.z;
+		// saturation
+			float3 intensity = dot(kncolor.rgb, LumCoeff);
+			kncolor.rgb = lerp(intensity, kncolor.rgb, KNSaturation);
+			kncolor.rgb /= kncolor.a;
+		// contrast
+			kncolor.rgb = ((kncolor.rgb - 0.5) * max(KNContrast, 0)) + 0.5;
+		// brightness
+			kncolor.rgb += (KNBrightness*0.1);
+			kncolor.rgb *= kncolor.a;
+		// low clip
+			kncolor=max(kncolor-(KNInBlack*0.1), 0.0) / max(1.0-(KNInBlack*0.1), 0.0001);
+        // activation switch
+		    bool knactive = KNActive;
+			
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		//return color;
+		color = lerp(color,kncolor,(knactive)*(KNEnable));
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+```
+
 ## Configuration
 
 The mod uses a simple configuration file located at `Data/SKSE/Plugins/ENBNighteyeFix.ini`.

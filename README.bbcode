@@ -1,0 +1,110 @@
+[size=6][b]ENB NightEye Fix[/b][/size]
+
+A Skyrim Anniversary Edition mod that synchronizes Night Eye spell effects with ENB's Khajiit Night Vision shader, providing a seamless visual experience for all Night Eye variants.
+
+[size=5][b]⚠️ Disclaimer[/b][/size]
+
+[b]This is my first mod - consider it alpha stage.[/b]
+
+[list]
+[*]Testing has been limited to Khajiit Night Eye with [url=https://www.lorerim.com/]Lorerim[/url] modlist
+[*]Should work with lesser powers in general, but not extensively tested
+[*]Requires [font=Courier New]enbeffect.fx[/font] patching - each ENB preset author may or may not choose to implement it
+[*]The included Rudy ENB patch is for testing purposes only and will likely not be maintained
+[*]This mod is open source - see Open Source section below for repository details
+[/list]
+
+[size=5][b]What Does This Mod Do?[/b][/size]
+
+ENB Series does not support the way Night Eye spells are triggered in Skyrim. When you activate any Night Eye variant - Khajiit Night Eye, Vampire Hunter Sight, or Werewolf Night Eye - the ENB shader simply doesn't respond, leaving you without the intended night vision effect.
+
+The Phinix Natural ENB patch was an earlier attempt to fix this, but it no longer works reliably in current ENB versions due to its dependency on the Params01 parameter array.
+
+[b]This mod provides a working solution using a hybrid approach:[/b]
+
+[list]
+[*][b]SKSE Plugin[/b]: Monitors equip/unequip events for Night Eye spells and uses the ENB API to set a hidden [font=Courier New]KNActive[/font] parameter
+[*][b]ENB Shader[/b]: Uses the Phinix Night Vision visual effect implementation
+[/list]
+
+The effect turns off automatically when you unequip the spell, and the state persists across saves and game loads.
+
+[b]Visual Customization[/b]: The shader parameters from the original Phinix patch are preserved and can be adjusted in real-time via the ENB GUI ([font=Courier New]Shift+Enter[/font]):
+
+[list]
+[*][b]Nighteye Balance[/b] - RGB color tint (default: blueish)
+[*][b]Nighteye SaturationInterior/Exterior[/b] - Color saturation (0.0-10.0)
+[*][b]Nighteye BrightnessInterior/Exterior[/b] - Brightness (-5.0 to 5.0)
+[*][b]Nighteye ContrastInterior/Exterior[/b] - Contrast (0.0-5.0)
+[*][b]Nighteye Low ClipInterior/Exterior[/b] - Black level clipping (0.0-1.0)
+[/list]
+
+[size=5][b]Supported Night Eye Spells[/b][/size]
+
+The mod comes pre-configured to work with:
+
+[list]
+[*][b]Khajiit Night Eye[/b] (Power Khajiit Night Eye)
+[*][b]Vampire Hunter Sight[/b]
+[*][b]Werewolf Night Eye[/b]
+[/list]
+
+You can easily add support for any custom Night Eye spells from mods by editing the configuration file.
+
+[size=5][b]Installation Variants[/b][/size]
+
+The mod is distributed in two versions to accommodate different ENB presets:
+
+[size=4][b]ENBNighteyeFix-RudyENB-patch[/b][/size]
+
+Includes the complete shader patch file pre-configured for [b]Rudy ENB[/b]. This is a drop-in solution that requires no additional configuration.
+
+[size=4][b]ENBNighteyeFix-NoPatch[/b][/size]
+
+Contains only the SKSE plugin without shader files. Use this variant if:
+[list]
+[*]You're using a different ENB preset and want to manually apply the shader patch
+[*]You want to customize the visual effects yourself
+[*]Your ENB preset already has compatible Night Vision shader code
+[/list]
+
+[size=5][b]Configuration[/b][/size]
+
+The mod uses a simple configuration file located at [font=Courier New]Data/SKSE/Plugins/ENBNighteyeFix.ini[/font].
+
+To add support for additional Night Eye spells from mods, simply add a new line with the spell's FormID:
+
+[code]
+[General]
+PowerKhajiitNightEye = 0x000AA01D
+VampireHunterSight = 0x000C4DE1
+WerewolfNightEye = 0x0006B10E
+YourCustomSpell = 0xYOURFORMID
+[/code]
+
+You can add as many spells as you want - there's no limit.
+
+[size=5][b]Requirements[/b][/size]
+
+[list]
+[*]Skyrim Anniversary Edition
+[*]SKSE64
+[*]ENB Series (any recent version)
+[*]An ENB preset correctly patched
+[/list]
+
+[size=5][b]Credits[/b][/size]
+
+Visual effect shader code from Phinix Natural ENB Night Eye patch.
+
+[size=5][b]Open Source[/b][/size]
+
+This mod is fully open source. The project consists of multiple repositories:
+
+[list]
+[*][b][url=https://github.com/bainos/Skyrim-Modding]Skyrim-Modding[/url][/b] - Main project repository with all components as submodules
+[*][b][url=https://github.com/bainos/Skyrim-ENBNighteyeFix]Skyrim-ENBNighteyeFix[/url][/b] - SKSE plugin and ENB shader patch
+[*][b][url=https://github.com/bainos/commonlibsse-ng-ae-vcpkg]commonlibsse-ng-ae-vcpkg[/url][/b] - Custom vcpkg registry with enb-api port
+[*][b][url=https://github.com/bainos/enb-api]enb-api[/url][/b] - ENB Series SDK with CMake configuration
+[*][b][url=https://github.com/bainos/CommonLibSSE-NG]CommonLibSSE-NG[/url][/b] - Fork updated to work with current dependency libraries (October 2025)
+[/list]
